@@ -13,7 +13,13 @@ import Bingo
 
 with open("Token.txt", 'r') as fp:
     gTOKEN = fp.readline()
-    
+ 
+with open("WOM.txt", 'r') as fp:
+    WOMid = fp.readline().rstrip('\n')
+    WOMvc = fp.readline().rstrip('\n')
+    print(WOMid)
+    print(WOMvc)
+
 # Bot
 intents = discord.Intents.default()
 intents.message_content = True
@@ -54,10 +60,9 @@ async def makeTeam(ctx: discord.ext.commands.Context, team:str):
 
 @bot.command()
 async def woodcutmvp(ctx: discord.ext.commands.Context):
-	id = 24073
 	teamName = "special people"
 	skill = "woodcutting"
-	BingoComp = WOM.WOMcomp(id)
+	BingoComp = WOM.WOMcomp(WOMid)
 	BingoComp.getWOMData(skill)
 	BingoComp.getWOMTeamData(BingoComp.DataTeamLists, teamName)
 	print(BingoComp.teamdata.teamName + " asked " + skill +" mvp")
@@ -68,7 +73,7 @@ async def woodcutxp(ctx: discord.ext.commands.Context):
 	id = 24073
 	teamName = "special people"
 	skill = "woodcutting"
-	BingoComp = WOM.WOMcomp(id)
+	BingoComp = WOM.WOMcomp(WOMid)
 	BingoComp.getWOMData(skill)
 	BingoComp.getWOMTeamData(BingoComp.DataTeamLists, teamName)
 	print(BingoComp.teamdata.teamName + " asked " + skill +" xp")
@@ -82,6 +87,11 @@ async def board(ctx: discord.ext.commands.Context):
 	board.setCompletedTileTrue(4,4)
 	board.setCompletedTileTrue(3,1)
 	await board.fillBoard(ctx)
+
+@bot.command()
+async def update(ctx: discord.ext.commands.Context):
+	WOM.WOMCompUpdate(WOMid, WOMvc)
+	await ctx.send("wom updated maybe")
 	
 logging.basicConfig(level=logging.DEBUG)
 

@@ -51,3 +51,17 @@ class WOMCompTeamData:
         self.AvgXP = AvgXP
         self.MVP = MVP
         self.skill = skill
+
+def WOMCompUpdate(id:str, vc:str):
+    headers = {
+        #'Content-type': 'application/json',
+    }
+    json_data = {
+        'verificationCode': vc,
+    }
+
+    print(headers)
+    print(json_data)
+    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    response = requests.post('https://api.wiseoldman.net/v2/competitions/' + id + '/update-all', headers=headers, json=json_data)
+
