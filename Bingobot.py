@@ -7,7 +7,7 @@ import os.path
 
 
 import WOM
-import BingoBoard
+import Bingo
 
 
 # Settings
@@ -55,7 +55,12 @@ async def woodcutxp(ctx: discord.ext.commands.Context):
         
 @bot.command()
 async def board(ctx: discord.ext.commands.Context):
-	await BingoBoard.fillBoard(ctx)
+	board = Bingo.BingoBoard()
+	board.setCompletedTileTrue(2,3)
+	board.setCompletedTileTrue(0,0)
+	board.setCompletedTileTrue(4,4)
+	board.setCompletedTileTrue(3,1)
+	await board.fillBoard(ctx)
 	
 logging.basicConfig(level=logging.DEBUG)
 
