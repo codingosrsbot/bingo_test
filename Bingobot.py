@@ -5,7 +5,6 @@ import asyncio
 import logging
 import os.path
 
-
 import WOM
 import Bingo
 
@@ -37,6 +36,21 @@ async def ping(ctx: discord.ext.commands.Context):
 	author = str(ctx.author.id)
 	logging.info(f"ping() from '{author}'")
 	await ctx.send("pong")
+
+
+@bot.command()
+async def makeTeam(ctx: discord.ext.commands.Context, team:str):
+	if discord.utils.get(ctx.author.roles, name="Bingo admin") is not None:
+		await ctx.send("i'll make you a team <3")
+		if team is not None:
+			role = await ctx.guild.create_role(name="Bingo team: " + team)
+			await ctx.send(team + " is created")
+		else:
+			await ctx.send("what team?")
+	else:
+		await ctx.send("Nice try!")
+		
+
 
 @bot.command()
 async def woodcutmvp(ctx: discord.ext.commands.Context):
