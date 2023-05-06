@@ -30,6 +30,13 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    
+@bot.command()
+async def ping(ctx: discord.ext.commands.Context):
+	""" testing """
+	author = str(ctx.author.id)
+	logging.info(f"ping() from '{author}'")
+	await ctx.send("pong")
 
 @bot.command()
 async def woodcutmvp(ctx: discord.ext.commands.Context):
