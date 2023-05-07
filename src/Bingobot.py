@@ -1,6 +1,6 @@
 
 import discord #pip install discord.py
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 import logging
 import os.path
@@ -11,14 +11,13 @@ import Bingo
 
 # Settings
 
-with open("Token.txt", 'r') as fp:
+with open("./config/Token.txt", 'r') as fp:
     gTOKEN = fp.readline()
  
-with open("WOM.txt", 'r') as fp:
+with open("./config/WOM.txt", 'r') as fp:
     WOMid = fp.readline().rstrip('\n')
-    WOMvc = fp.readline().rstrip('\n')
-    print(WOMid)
-    print(WOMvc)
+    WOMgid = fp.readline().rstrip('\n')
+
 
 # Bot
 intents = discord.Intents.default()
@@ -28,6 +27,8 @@ intents.members = True
 description = '''Discord osrs bot'''
 bot = commands.Bot(intents=intents, command_prefix= "<" , description='Bingo time',  case_insensitive=True)
 
+WOMg = WOM.WOMGroup(WOMgid)
+	
 
 @bot.event
 async def on_ready():
@@ -35,7 +36,15 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    myIntervalTasks.start()
     
+    
+@tasks.loop(seconds=3600)
+async def myIntervalTasks():
+	print("WOM gorup updating")
+	#WOMg.updateGroup()
+ 
+
 @bot.command()
 async def ping(ctx: discord.ext.commands.Context):
 	""" testing """
@@ -57,28 +66,30 @@ async def makeTeam(ctx: discord.ext.commands.Context, team:str):
 		await ctx.send("Nice try!")
 		
 
-
 @bot.command()
 async def woodcutmvp(ctx: discord.ext.commands.Context):
 	teamName = "special people"
 	skill = "woodcutting"
 	BingoComp = WOM.WOMcomp(WOMid)
-	BingoComp.getWOMData(skill)
-	BingoComp.getWOMTeamData(BingoComp.DataTeamLists, teamName)
+	BingoComp.getData(skill)
+	BingoComp.getTeamData(BingoComp.DataTeamLists, teamName)
 	print(BingoComp.teamdata.teamName + " asked " + skill +" mvp")
 	await ctx.send("The " + skill  + " mvp of " + BingoComp.teamdata.teamName + " is ... " + BingoComp.teamdata.MVP)
-	
+
+
 @bot.command()
 async def woodcutxp(ctx: discord.ext.commands.Context):
 	id = 24073
 	teamName = "special people"
 	skill = "woodcutting"
 	BingoComp = WOM.WOMcomp(WOMid)
-	BingoComp.getWOMData(skill)
-	BingoComp.getWOMTeamData(BingoComp.DataTeamLists, teamName)
+	BingoComp.getData(skill)
+	BingoComp.getTeamData(BingoComp.DataTeamLists, teamName)
 	print(BingoComp.teamdata.teamName + " asked " + skill +" xp")
 	await ctx.send("The " + skill  + " xp of " + BingoComp.teamdata.teamName + " is ... " + BingoComp.teamdata.TotalXP)
-        
+
+
+
 @bot.command()
 async def board(ctx: discord.ext.commands.Context):
 	board = Bingo.BingoBoard()
@@ -88,11 +99,17 @@ async def board(ctx: discord.ext.commands.Context):
 	board.setCompletedTileTrue(3,1)
 	await board.fillBoard(ctx)
 
-@bot.command()
-async def update(ctx: discord.ext.commands.Context):
-	WOM.WOMCompUpdate(WOMid, WOMvc)
-	await ctx.send("wom updated maybe")
-	
+
 logging.basicConfig(level=logging.DEBUG)
 
 bot.run(gTOKEN)
+
+
+
+
+
+
+
+
+
+

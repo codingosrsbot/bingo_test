@@ -2,6 +2,29 @@ from PIL import Image #pip install pillow
 from io import BytesIO
 import discord #pip install discord.py
 from discord.ext import commands
+'''
+Tile = [
+    "name" : ""
+    "description" : ""
+    "type" : ""
+    "complete" : ""
+    "row" : ""
+    "column" : ""
+    ]
+
+'''
+
+
+
+
+
+
+
+
+
+
+
+
 
 class BingoTile:
     def __init__(self, row, col, name, descrip, type, completed):
@@ -56,8 +79,8 @@ class BingoBoard:
         tilesize = (286,232)
         boardstartpoint = (0,600)
 
-        backgound = Image.open('board.png')
-        overlay = Image.open('complete.png')
+        backgound = Image.open('./img/board.png')
+        overlay = Image.open('./img/complete.png')
         overlay = overlay.resize(completesize)
         boardImg = backgound.copy()
         i = 0
