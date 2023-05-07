@@ -22,10 +22,6 @@ Tile = [
 
 
 
-
-
-
-
 class BingoTile:
     def __init__(self, row, col, name, descrip, type, completed):
         self.row = row
