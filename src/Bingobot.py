@@ -15,9 +15,15 @@ import Bingo
 with open("./config/Token.txt", 'r') as fp:
     gTOKEN = fp.readline()
  
-with open("./config/WOM.txt", 'r') as fp:
-    WOMid = fp.readline().rstrip('\n')
-    WOMgid = fp.readline().rstrip('\n')
+with open("./config/WOM.json", 'r') as f:
+    WOMjson = json.load(f)
+    WOMid = WOMjson['competition id']
+    WOMgid = WOMjson['group id']
+    
+with open("./config/Bingoadmins.json", 'r') as f:
+    Bingoadminjson = json.load(f)
+    BingoAdminRole = Bingoadminjson['admin role']
+    BingoOrganizerid = Bingoadminjson['organizer id']
 
 with open("./config/tiles.json", 'r') as f:
     Bingotilesjson = json.load(f)
@@ -45,20 +51,34 @@ async def on_ready():
     
 @bot.event
 async def on_reaction_add(reaction, user):
-	if reaction.message.content == 'Do you love me?' and str(reaction.emoji) == '✅'and user != reaction.message.author:
-		channel = reaction.message.channel
-		role = discord.utils.get(user.roles, name='bingo admin')
-		if role is not None:
-			await channel.send(f'{user.name} loves me! aaaaaaaaaaaaaaaa <3')
+	channel = reaction.message.channel
+	for x in Bingotilesjson:
+		if reaction.message.content == str(x['description']) and str(reaction.emoji) == '✅'and user != reaction.message.author:
+			role = discord.utils.get(user.roles, rname= str(BingoAdminRole))
+			if role is not None:
+				await channel.send(f"{user.name} approved {x['description']}")
+			else:
+				await channel.send(f'{user.name} you are not an admin!')
 		else:
-			await channel.send(f'{user.name} is icky! waaaaaaaaaaa')
-	if reaction.message.content == 'Do you love me?' and str(reaction.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿'and user.id == 145345772995477504:
-		await channel.send(f'{user.name} is the best')
+			if reaction.message.content == str(x['description']) and str(reaction.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿':
+				channel = reaction.message.channel
+				ownerGuild = bot.guilds[0]  # Get the first guild the bot is a member of
+				ownerUser = discord.utils.get(ownerGuild.members, id=BingoOrganizerid)
+				if user.id == ownerUser.id:
+					await channel.send(f'{ownerUser.name} is the best')
+				else: 
+					await channel.send(f'{user.name} stop pretending to be {ownerUser.name}')
+			else:
+				channel = reaction.message.channel
+				print(x['description'])
+				print(str(reaction.emoji))
+				await channel.send(f'{user.name} this did not work')
     
 @tasks.loop(seconds=3600)
 async def myIntervalTasks():
 	print("WOM gorup updating")
 	#WOMg.updateGroup()
+	#update skill tiles from every team
  
 
 @bot.command()
@@ -71,10 +91,10 @@ async def ping(ctx: discord.ext.commands.Context):
 
 @bot.command()
 async def makeTeam(ctx: discord.ext.commands.Context, team:str):
-	if discord.utils.get(ctx.author.roles, name="Bingo admin") is not None:
+	if discord.utils.get(ctx.author.roles, name=str(BingoAdminRole)) is not None:
 		await ctx.send("i'll make you a team <3")
 		if team is not None:
-			role = await ctx.guild.create_role(name="Bingo team: " + team)
+			role = await ctx.guild.create_role(name="Bingo team: {team:str}")
 			await ctx.send(team + " is created")
 		else:
 			await ctx.send("what team?")
@@ -89,20 +109,19 @@ async def woodcutmvp(ctx: discord.ext.commands.Context):
 	BingoComp = WOM.WOMcomp(WOMid)
 	BingoComp.getData(skill)
 	BingoComp.getTeamData(BingoComp.DataTeamLists, teamName)
-	print(BingoComp.teamdata.teamName + " asked " + skill +" mvp")
-	await ctx.send("The " + skill  + " mvp of " + BingoComp.teamdata.teamName + " is ... " + BingoComp.teamdata.MVP)
+	print("{BingoComp.teamdata.teamName:str} asked {strskill:str} mvp")
+	await ctx.send("The {skill:str} mvp of {BingoComp.teamdata.teamName:str} is ... {BingoComp.teamdata.MVP:str}")
 
 
 @bot.command()
 async def woodcutxp(ctx: discord.ext.commands.Context):
-	id = 24073
 	teamName = "special people"
 	skill = "woodcutting"
 	BingoComp = WOM.WOMcomp(WOMid)
 	BingoComp.getData(skill)
 	BingoComp.getTeamData(BingoComp.DataTeamLists, teamName)
-	print(BingoComp.teamdata.teamName + " asked " + skill +" xp")
-	await ctx.send("The " + skill  + " xp of " + BingoComp.teamdata.teamName + " is ... " + BingoComp.teamdata.TotalXP)
+	print("{BingoComp.teamdata.teamName:str} asked {skill:str} xp")
+	await ctx.send("The {skill:str} xp of {BingoComp.teamdata.teamName:str} is ... {BingoComp.teamdata.TotalXP:str}")
 
 @bot.command()
 async def board(ctx: discord.ext.commands.Context):
@@ -128,7 +147,10 @@ async def q(ctx: discord.ext.commands.Context):
 
 @bot.command()
 async def p(ctx: discord.ext.commands.Context):
-	await ctx.channel.purge()
+	if ctx.author.id == 145345772995477504:
+		await ctx.channel.purge()
+	else:
+		await ctx.channel.send(f'{ctx.author.name} stop')
 
 
 logging.basicConfig(level=logging.DEBUG)

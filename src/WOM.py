@@ -12,7 +12,7 @@ class WOMcomp:
         
     
     def makeAPIUrl(self, skill:str):
-        self.url = "https://api.wiseoldman.net/v2/competitions/{}/csv?table=teams&metric={}".format(self.id, skill)
+        self.url = "https://api.wiseoldman.net/v2/competitions/{self.id:str}/csv?table=teams&metric={skill:str}"
 
     def getData(self, skill:str):
         self.makeAPIUrl(skill)
@@ -83,11 +83,7 @@ class WOMGroup:
         users = pd.DataFrame(pd.Series(users).unique(), columns=['user'])
         users['u_count'] = users.index
         users = users.set_index('user')
-        print(users)
-        print("aaaaaaaaaaaaaaaa")
-        #results = self.__class__.updateUser(x,users.index.tolist()) for x in users.index.tolist()]
         for x in users.index.tolist():
-            print(x)
             self.__class__.updateUser(self,x, users)
             
 

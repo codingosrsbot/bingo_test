@@ -2,24 +2,6 @@ from PIL import Image #pip install pillow
 from io import BytesIO
 import discord #pip install discord.py
 from discord.ext import commands
-'''
-Tile = [
-    "name" : ""
-    "description" : ""
-    "type" : ""
-    "complete" : ""
-    "row" : ""
-    "column" : ""
-    ]
-
-'''
-
-
-
-
-
-
-
 
 
 class BingoTile:
