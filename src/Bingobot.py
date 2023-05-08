@@ -50,30 +50,26 @@ async def on_ready():
     myIntervalTasks.start()
     
 @bot.event
-async def on_reaction_add(reaction, user):
-	channel = reaction.message.channel
-	for x in Bingotilesjson:
-		if reaction.message.content == str(x['description']) and str(reaction.emoji) == '✅'and user != reaction.message.author:
-			role = discord.utils.get(user.roles, rname= str(BingoAdminRole))
+async def on_raw_reaction_add(payload):
+	channel = await bot.fetch_channel(payload.channel_id)
+	message = await channel.fetch_message(payload.message_id)
+	guild = bot.get_guild(payload.guild_id)
+	user = guild.get_member(payload.user_id)
+	roles = user.roles
+	for x in Bingotilesjson:	
+		if message.content == str(x['description']) and str(payload.emoji) == '✅' and user != message.author:
+			role = discord.utils.get(roles, name= str(BingoAdminRole))
 			if role is not None:
 				await channel.send(f"{user.name} approved {x['description']}")
 			else:
 				await channel.send(f'{user.name} you are not an admin!')
-		else:
-			if reaction.message.content == str(x['description']) and str(reaction.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿':
-				channel = reaction.message.channel
-				ownerGuild = bot.guilds[0]  # Get the first guild the bot is a member of
-				ownerUser = discord.utils.get(ownerGuild.members, id=BingoOrganizerid)
-				if user.id == ownerUser.id:
-					await channel.send(f'{ownerUser.name} is the best')
-				else: 
-					await channel.send(f'{user.name} stop pretending to be {ownerUser.name}')
-			else:
-				channel = reaction.message.channel
-				print(x['description'])
-				print(str(reaction.emoji))
-				await channel.send(f'{user.name} this did not work')
-    
+		if message.content == str(x['description']) and str(payload.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿'and user != message.author:
+			if str(payload.user_id) == str(BingoOrganizerid) :
+				await channel.send(f'{user.name} is the best')
+			else: 
+				print(payload.user_id)
+				print(BingoOrganizerid)
+				await channel.send(f'{user.name} stop pretending to be in charge')
 @tasks.loop(seconds=3600)
 async def myIntervalTasks():
 	print("WOM gorup updating")
@@ -156,3 +152,4 @@ async def p(ctx: discord.ext.commands.Context):
 logging.basicConfig(level=logging.DEBUG)
 
 bot.run(gTOKEN)
+
