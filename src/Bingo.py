@@ -1,20 +1,404 @@
+import os
 from PIL import Image #pip install pillow
 from io import BytesIO
 import discord #pip install discord.py
 from discord.ext import commands
+import json
 
 
-class BingoTile:
-    def __init__(self, row, col, name, descrip, type, completed):
-        self.row = row
-        self.col = col
-        self.name = name
-        self.descrip = descrip
-        self.type = type #xp or evidence
-        self.completed = completed
 
 
-class BingoBoard:
+#loading assets
+with open("./config/tiles.json", 'r') as f:
+    bingoTilesJson = json.load(f)
+    
+with open("./config/topsecret.json", 'r') as f:
+    secretTilesjson = json.load(f)
+
+with open("./config/bingoConfig.json", 'r') as f:
+    bingoConfigJson = json.load(f)
+    bingoAdminRole = bingoConfigJson['admin role']
+    bingoOrganizerid = bingoConfigJson['organizer id']
+
+
+#functions
+def startup():
+    loadAllBingoBoards()
+    for x in boardsData:
+        tmpTeam = x['Team name']
+        tmpBoardData = x['Board data']
+        tmpBoard = BingoBoard(tmpTeam, tmpBoardData)
+        bingoBoards.append(tmpBoard)
+
+    
+
+def loadAllBingoBoards():
+    boardsData.clear()
+    root_dir = str(f"./teams/")
+    # iterate through all subdirectories in the root directory
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # iterate through all filenames in the current subdirectory
+        for filename in filenames:
+            if filename == "Board.json":
+                board_path = os.path.join(dirpath, filename)
+                with open(board_path, "r") as f:
+                    board_data = json.load(f)
+                teamName = dirpath.removeprefix("./teams/")
+                tmpList = {'Team name': teamName, 'Board data': board_data}
+                boardsData.append(tmpList)
+    print(boardsData)
+    saveBingoBoard("totaal", boardsData)
+
+def createBingoBoard(team):
+    board = bingoTilesJson
+    saveBingoBoard(team, board)
+
+def saveAllBingoBoards():
+    for x in boardsData:
+        team = x['Team name']
+        data = x['Board data']
+        fpath = str(f"./teams/{team}")
+        if not os.path.exists(fpath):
+            os.makedirs(fpath)
+        with open(f"{fpath}/Board.json", 'w') as f:
+            json.dump(data, f, indent=4)
+
+def saveBingoBoard(team, board):
+    fpath = str(f"./teams/{team}")
+    if not os.path.exists(fpath):
+        os.makedirs(fpath)
+    with open(f"{fpath}/Board.json", 'w') as f:
+        json.dump(board, f, indent=4)
+
+def getBoard(team):
+    for x in boardsData:
+        if team == x["Team name"]:
+            return x
+
+def addBingoTilesToBoard(boardData):
+    tmpBoard = []
+    for x in boardData:
+        tmpTile = BingoTile(x)
+        tmpTileData = tmpTile.getTileData()
+        print(tmpTileData)
+        tmpBoard.append(tmpTileData)
+        print(tmpBoard)
+        return tmpBoard
+
+def getAllTaskDescriptions(board):
+	descriptions = []
+	for x in board:
+			match x['type']:
+				case "evidence":
+					descriptions.append(x['description'])
+				case "subtile evidence":
+					for y in x['type specific']['subtiles']:
+						descriptions.append(y['description'])
+				case "subtile set evidence":
+					for y in x['type specific']['subtileset']:
+						for z in y['subtiles']: 
+							descriptions.append(z['description'])
+				case "count":
+					print("count")
+				case "set count":
+					print("set count")
+				case "xp":
+					print("xp")                                                                         
+	return descriptions
+
+async def isBingoTaskApproved(payload):
+    channel = await bot.fetch_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    guild = bot.get_guild(payload.guild_id)
+    user = guild.get_member(payload.user_id)
+    roles = user.roles
+    for descr in bingoDescriptions:	
+        if message.content == str(descr) and str(payload.emoji) == '✅' and user != message.author:
+            role = discord.utils.get(roles, name= str(bingoAdminRole))
+            if role is not None:
+                await channel.send(f"{user.name} approved {str(descr)}")
+            else:
+                await channel.send(f'{user.name} you are not an admin!')
+        if message.content == str(descr) and str(payload.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿'and user != message.author:
+            if str(payload.user_id) == str(bingoOrganizerid) :
+                await channel.send(f'{user.name} is the best')
+            else: 
+                await channel.send(f'{user.name} stop pretending to be in charge')
+
+async def isBingoTaskUnapproved(payload):
+    channel = await bot.fetch_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    guild = bot.get_guild(payload.guild_id)
+    user = guild.get_member(payload.user_id)
+    roles = user.roles
+    for descr in bingoDescriptions:	
+        if message.content == str(descr) and str(payload.emoji) == '✅' and user != message.author:
+            role = discord.utils.get(roles, name= str(bingoAdminRole))
+            if role is not None:
+                await channel.send(f"{user.name} removed approval {str(descr)}")
+            else:
+                await channel.send(f'{user.name} you are not an admin!')
+        if message.content == str(descr) and str(payload.emoji) == '🏴󠁧󠁢󠁳󠁣󠁴󠁿'and user != message.author:
+            if str(payload.user_id) == str(bingoOrganizerid) :
+                await channel.send(f'{user.name} is the best (removed objection)')
+            else: 
+                await channel.send(f'{user.name} stop pretending to be in charge')
+
+#init
+bot = []
+boardsData = []
+bingoBoards = []
+
+bingoDescriptions = getAllTaskDescriptions(bingoTilesJson)
+
+class BingoBoard():
+    def __init__(self, team, data):
+            self.team = team
+            self.data = data
+    
+    def getBoardTeam(self):
+        return self.team
+
+    def getBoardData(self):
+        return self.data
+        
+
+
+    
+
+class BingoTile(BingoBoard):
+    def __init__(self, team, data):
+        self.data = team
+        self.data = data
+        match self.data['type']:
+            case "evidence":
+                self.typeSpecific = []
+            case "subtile evidence":
+                self.typeSpecific = evidenceSubtile(self)
+            case "subtile set evidence":
+                self.typeSpecific = evidenceSubtile(self)
+            case "count":
+                print("count")
+            case "set count":
+                print("set count")
+            case "xp":
+                print("xp") 
+
+    def getTileData(self):
+         print(self.data)
+         return list(self.data)   
+
+    def getTileName(self):
+        return self.data['name']
+
+    def getTileDescription(self):
+        return self.data['escription']
+    
+    def getTileType(self):
+        return self.data['type']
+
+    def getTileCompleted(self):
+        return self.data['completed']
+
+    def setTileCompleted(self):
+        self.data['completed'] += 1
+
+    def removeTileCompleted(self):
+        self.data['completed'] -= 1
+    
+    def setTileCompleted(self, amount):
+        self.data['completed'] = amount
+    
+    def isTileOverruled(self):
+        return self.data['overruled']
+
+    def setTileOverruled(self):
+        self.data['overruled'] = True
+
+    def removeTileOverruled(self):
+        self.data['overruled'] = False
+
+    def getTileRow(self):
+        return self.data['row']
+    
+    def getTileRow(self):
+        return self.data['column']
+         
+
+class evidenceSubtile(BingoTile):
+    def __init__(self, data):
+        self.data = data
+        type = self.data.type
+        match type: 
+            case "subtile evidence":
+                self.subtile = self.data['type specific']['subtiles']
+            case "subtile set evidence": 
+                self.subtile = self.data['type specific']['subtileset']['subtiles']
+
+    def getEvidenceSubtileDescription(self):
+        return self.subtile['description']
+
+    def getEvidenceSubtileCompleted(self):
+        return self.subtile['completed']
+
+    def setEvidenceSubtileCompleted(self):
+        match type: 
+            case "subtile evidence":
+                self.data['type specific']['subtiles']['completed'] += 1
+                self.subtile = self.data['type specific']['subtiles']
+            case "subtile set evidence": 
+                self.data['type specific']['subtileset']['subtiles']['completed'] += 1
+                self.subtile = self.data['type specific']['subtileset']['subtiles']
+
+    def removeEvidenceSubtileCompleted(self):
+        match type: 
+            case "subtile evidence":
+                self.data['type specific']['subtiles']['completed'] -= 1
+                self.subtile = self.data['type specific']['subtiles']
+            case "subtile set evidence": 
+                self.data['type specific']['subtileset']['subtiles']['completed'] -= 1
+                self.subtile = self.data['type specific']['subtileset']['subtiles']
+
+    def isEvidenceSubtileOverruled(self):
+        return self.subtile['overruled']
+
+    def areSubtilesCompleted(self):
+        tmpCompleted = 0
+        for x in self.subtile:
+            if x['completed'] != 0 and x['overruled'] == False:
+                tmpCompleted = 1
+            super(evidenceSubtile, self).setTileCompleted(tmpCompleted)
+
+    
+
+               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class BingoBoardOld:
     row = 5
     col = 5
     def __init__(self): 

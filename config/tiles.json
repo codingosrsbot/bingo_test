@@ -1,18 +1,150 @@
 [
     {
-        "name": "Get bowlet",
-        "description": "Get the omlet and tbow",
+        "name": "infernal nerd",
+        "description": "get infernal cape",
         "type": "evidence",
-        "complete": "No",
-        "row": "1",
-        "column": "2"
+        "completed": 0,
+        "overruled": false,
+        "row": 0,
+        "column": 0
     },
     {
-        "name": "Get elly",
-        "description": "Get the elly sigil from corp",
-        "type": "evidence",
-        "complete": "No",
-        "row": "1",
-        "column": "3"
+        "name": "bowlet",
+        "description": "get bowlet",
+        "type": "subtile evidence",
+        "type specific": 
+            {
+                "subtiles": 
+                    [
+                        {
+                            "description": "get tbow",
+                            "completed": 0,
+                            "overruled": false
+                        },
+                        {
+                            "description": "get omlet",
+                            "completed": 0,
+                            "overruled": false
+                        }
+                    ]
+            },
+        "completed": 0,
+        "overruled": false,
+        "row": 0,
+        "column": 1
+    },
+    {
+        "name": "ely ring",
+        "description": "full ely or full hydra ring",
+        "type": "subtile set evidence",
+        "type specific": 
+            {
+                "subtileset": 
+                    [
+                        {
+                            "set": "elly",
+                            "subtiles":
+                                [
+                                    {
+                                        "description": "elysian sigil",
+                                        "completed": 0,
+                                        "overruled": false
+                                    },
+                                    {
+                                        "description": "spirit shield",
+                                        "completed": 0,
+                                        "overruled": false
+                                    },
+                                    {
+                                        "description": "holy elixer",
+                                        "completed": 0,
+                                        "overruled": false
+                                    }
+                                ]
+                        },
+                        {
+                            "set": "brimstone ring",
+                            "subtiles":
+                                [
+                                    {
+                                        "description": "hydra's eye",
+                                        "completed": 0,
+                                        "overruled": false
+                                    },
+                                    {
+                                        "description": "hydra's haert",
+                                        "completed": 0,
+                                        "overruled": false
+                                    },
+                                    {
+                                        "description": "hydra's fang",
+                                        "completed": 0,
+                                        "overruled": false
+                                    }
+                                ]
+                        }
+                    ]
+            },  
+        "completed": 0,
+        "overruled": false,
+        "row": 0,
+        "column": 2
+    },
+    {
+        "name": "hate it here",
+        "description": "die 1000 times",
+        "type": "count",
+        "type specific": 
+            {
+                "goal": 1000,
+                "amount": 0                   
+            },
+        "completed": 0,
+        "overruled": false,
+        "row": 0,
+        "column": 3
+    },
+    {
+        "name": "trouble wars",
+        "description": "play 1000 games of tb or castle wars",
+        "type": "set count",
+        "type specific": 
+            {
+                "subcounter":
+                    [
+                        {
+                            "set": "1000 games of tb",
+                            "goal": 1000,
+                            "amount": 0,
+                            "completed": 0,
+                            "overruled": false   
+                        },         
+                        {
+                            "set": "1000 games of castle wars",
+                            "goal": 1000,
+                            "amount": 0,
+                            "completed": 0,
+                            "overruled": false   
+                        }
+                    ]    
+            },
+        "completed": 0,
+        "overruled": false,
+        "row": 3,
+        "column": 0
+    },
+    {
+        "name": "sail away",
+        "description": "200m sailing xp",
+        "type": "xp",
+        "type specific": 
+            {
+                "skill": "sailing",
+                "xp": 200000000                    
+            },
+        "completed": 0,
+        "overruled": false,
+        "row": 0,
+        "column": 1
     }
 ]

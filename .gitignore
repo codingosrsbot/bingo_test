@@ -1,7 +1,9 @@
 token.txt
-WOM.json
-complete.pngBingoadmins.json
+WOMConfig.json
+complete.png
+bingoConfig.json
 tiles.json
+topsecret.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
